@@ -23,21 +23,21 @@ namespace CodeChallenge.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateEmployee([FromBody] Employee employee)
+        public async Task<IActionResult> CreateEmployee([FromBody] Employee employee)
         {
             _logger.LogDebug($"Received employee create request for '{employee.FirstName} {employee.LastName}'");
 
-            _employeeService.Create(employee);
+            await _employeeService.CreateAsync(employee);
 
             return CreatedAtRoute("getEmployeeById", new { id = employee.EmployeeId }, employee);
         }
 
         [HttpGet("{id}", Name = "getEmployeeById")]
-        public IActionResult GetEmployeeById(String id)
+        public async Task<IActionResult> GetEmployeeById(string id, bool useRecursiveDirectReports)
         {
             _logger.LogDebug($"Received employee get request for '{id}'");
 
-            var employee = _employeeService.GetById(id);
+            var employee = await _employeeService.GetByIdAsync(id, useRecursiveDirectReports);
 
             if (employee == null)
                 return NotFound();
@@ -46,15 +46,15 @@ namespace CodeChallenge.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult ReplaceEmployee(String id, [FromBody]Employee newEmployee)
+        public async Task<IActionResult> ReplaceEmployee(string id, [FromBody]Employee newEmployee)
         {
             _logger.LogDebug($"Recieved employee update request for '{id}'");
 
-            var existingEmployee = _employeeService.GetById(id);
+            var existingEmployee = await _employeeService.GetByIdAsync(id, false);
             if (existingEmployee == null)
                 return NotFound();
 
-            _employeeService.Replace(existingEmployee, newEmployee);
+            await _employeeService.ReplaceAsync(existingEmployee, newEmployee);
 
             return Ok(newEmployee);
         }

@@ -47,7 +47,7 @@ namespace CodeChallenge.Data
         private void FixUpReferences(List<Employee> employees)
         {
             var employeeIdRefMap = from employee in employees
-                                select new { Id = employee.EmployeeId, EmployeeRef = employee };
+                                   select new { Id = employee.EmployeeId, EmployeeRef = employee };
 
             employees.ForEach(employee =>
             {

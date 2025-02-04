@@ -19,45 +19,81 @@ namespace CodeChallenge.Services
             _logger = logger;
         }
 
-        public Employee Create(Employee employee)
+        public async Task<Employee> CreateAsync(Employee employee)
         {
-            if(employee != null)
+            if (employee != null)
             {
-                _employeeRepository.Add(employee);
-                _employeeRepository.SaveAsync().Wait();
+                await _employeeRepository.AddAsync(employee);
+                await _employeeRepository.SaveAsync();
             }
 
             return employee;
         }
 
-        public Employee GetById(string id)
+        public async Task<Employee> GetByIdAsync(string id, bool useRecursiveDirectReports)
         {
-            if(!String.IsNullOrEmpty(id))
+            if (!string.IsNullOrWhiteSpace(id))
             {
-                return _employeeRepository.GetById(id);
+                if (useRecursiveDirectReports)
+                {
+                    return await _employeeRepository.GetByIdRecursiveDirectReportsAsync(id);
+                }
+                return await _employeeRepository.GetByIdAsync(id);
             }
 
             return null;
         }
 
-        public Employee Replace(Employee originalEmployee, Employee newEmployee)
+        public async Task<Employee> ReplaceAsync(Employee originalEmployee, Employee newEmployee)
         {
-            if(originalEmployee != null)
+            if (originalEmployee != null)
             {
                 _employeeRepository.Remove(originalEmployee);
                 if (newEmployee != null)
                 {
                     // ensure the original has been removed, otherwise EF will complain another entity w/ same id already exists
-                    _employeeRepository.SaveAsync().Wait();
+                    await _employeeRepository.SaveAsync();
 
                     _employeeRepository.Add(newEmployee);
                     // overwrite the new id with previous employee id
                     newEmployee.EmployeeId = originalEmployee.EmployeeId;
                 }
-                _employeeRepository.SaveAsync().Wait();
+                await _employeeRepository.SaveAsync();
             }
 
             return newEmployee;
+        }
+
+        public async Task<int> GetNumberOfDirectReportsAsync(Employee employee)
+        {
+            if (employee.DirectReports == null ||
+                !employee.DirectReports.Any())
+            {
+                return 0;
+            }
+
+            int count = employee.DirectReports.Count;
+            foreach (var directReport in employee.DirectReports)
+            {
+                count += await GetNumberOfDirectReportsAsync(directReport);
+            }
+
+            return count;
+        }
+
+        public Employee GetById(string id)
+        {
+            return GetByIdAsync(id, false).GetAwaiter().GetResult();
+        }
+
+        public Employee Replace(Employee originalEmployee, Employee newEmployee)
+        {
+            return ReplaceAsync(originalEmployee, newEmployee).GetAwaiter().GetResult();
+        }
+
+        public Employee Create(Employee employee)
+        {
+            return CreateAsync(employee).GetAwaiter().GetResult();
         }
     }
 }

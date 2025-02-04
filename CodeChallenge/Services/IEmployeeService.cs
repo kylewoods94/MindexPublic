@@ -8,8 +8,13 @@ namespace CodeChallenge.Services
 {
     public interface IEmployeeService
     {
-        Employee GetById(String id);
+        Employee GetById(string id);
         Employee Create(Employee employee);
         Employee Replace(Employee originalEmployee, Employee newEmployee);
+        Task<int> GetNumberOfDirectReportsAsync(Employee employee);
+        Task<Employee> GetByIdAsync(string id, bool useRecursiveDirectReports);
+        Task<Employee> CreateAsync(Employee employee);
+        Task<Employee> ReplaceAsync(Employee originalEmployee, Employee newEmployee);
+        
     }
 }
