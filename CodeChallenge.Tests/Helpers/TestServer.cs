@@ -17,9 +17,10 @@ namespace CodeCodeChallenge.Tests.Integration.Helpers
 
         public HttpClient NewClient()
         {
-            return applicationFactory.CreateClient();
+            var client = applicationFactory.CreateClient();
+            client.DefaultRequestHeaders.Add("x-api-key", "3F761822-7EC2-49E4-B5A8-A9F49B88FD93");
+            return client;
         }
-
 
         public ValueTask DisposeAsync()
         {

@@ -1,6 +1,7 @@
 ﻿using System;
 
 using CodeChallenge.Data;
+using CodeChallenge.Middleware;
 using CodeChallenge.Repositories;
 using CodeChallenge.Services;
 
@@ -31,9 +32,8 @@ namespace CodeChallenge.Config
                 app.UseDeveloperExceptionPage();
                 SeedEmployeeDB();
             }
-
+            app.UseMiddleware<ApiKeyMiddleware>();
             app.UseAuthorization();
-
             app.MapControllers();
 
             return app;
@@ -44,6 +44,8 @@ namespace CodeChallenge.Config
 
             services.AddScoped<IEmployeeService, EmployeeService>();
             services.AddScoped<IEmployeeRepository, EmployeeRespository>();
+            services.AddScoped<ICompensationService, CompensationService>();
+            services.AddScoped<ICompensationRepository, CompensationRepository>();
 
             services.AddControllers();
         }
